@@ -1,10 +1,8 @@
 from os import remove, path
 from threading import Thread
-from oauth2client.service_account import ServiceAccountCredentials as ServCreds
 import tkinter as tk
 from tkinter.ttk import *
 from tkinter import Menu, filedialog
-from pandas import isna
 from mailmerge import MailMerge
 from docx2pdf import convert as docx2pdf
 
