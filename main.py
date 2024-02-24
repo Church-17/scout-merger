@@ -53,8 +53,9 @@ class ScoutMergerGUI:
         self.loadbar_win.quit()
 
     def load_db(self):
-        self.loc_info = self.spreadsheet.read(sheet_name).dropna(subset=["Località"]).sort_values("Località").fillna("")
+        self.loc_info = self.spreadsheet.read(sheet_name)
         self.header = list(self.loc_info.columns.values)
+        self.loc_info = self.loc_info.dropna(subset=[self.header[0]]).sort_values(self.header[0]).fillna("")
 
     def setup_window(self):
         self.window = tk.Tk()
@@ -82,7 +83,7 @@ class ScoutMergerGUI:
         self.loc_frame.grid(row=0, column=0, columnspan=2, pady=8, sticky=tk.N)
         self.loc_label = Label(self.loc_frame, text="Località:")
         self.loc_label.grid(row=0, column=0, padx=5)
-        self.loc_combo = Combobox(self.loc_frame, values=list(self.loc_info["Località"]), width=30)
+        self.loc_combo = Combobox(self.loc_frame, values=list(self.loc_info[self.header[0]]), width=30)
         self.loc_combo.grid(row=0, column=1, padx=5)
         self.loc_combo.bind("<<ComboboxSelected>>", self.update_recap)
         
@@ -141,7 +142,7 @@ class ScoutMergerGUI:
         self.window.update_idletasks()
         self.load_db()
         current_index = self.loc_combo.current()
-        self.loc_combo.config(values=list(self.loc_info["Località"]))
+        self.loc_combo.config(values=list(self.loc_info[self.header[0]]))
         if current_index >= 0:
             self.loc_combo.current(current_index)
         self.update_recap(None)
@@ -165,7 +166,7 @@ class ScoutMergerGUI:
     def update_recap(self, event):
         if self.loc_combo.current() < 0:
             return
-        self.loc_dict = self.loc_info.loc[self.loc_info['Località'] == self.loc_combo.get()].iloc[0]
+        self.loc_dict = self.loc_info.loc[self.loc_info[self.header[0]] == self.loc_combo.get()].iloc[0]
         for value, data in zip(self.recap_values, self.loc_dict.values):
             if data == True:
                 data = "\U00002705"
