@@ -29,13 +29,13 @@ class ScoutMergerGUI:
         loadbar.start()
         self.loadbar_win.mainloop()
         loadbar.stop()
-        self.loadbar_win.destroy()
 
         thread.join()
         if self.spreadsheet == None:
             showerror("db")
             return
 
+        self.loadbar_win.destroy()
         self.setup_window()
         if path.isfile(settings_path):
             with open(settings_path, "r") as settings_file:
@@ -45,8 +45,8 @@ class ScoutMergerGUI:
         self.window.mainloop()
 
     def connect_spreadsheet(self):
+        self.spreadsheet = GoogleSheet(spreadsheet_url)
         try:
-            self.spreadsheet = GoogleSheet(spreadsheet_url)
             self.load_db()
         except:
             self.spreadsheet = None
@@ -134,7 +134,11 @@ class ScoutMergerGUI:
     def update_db(self):
         self.notify_label.config(text="Aggiornamento database...", foreground="blue")
         self.window.update_idletasks()
-        self.load_db()
+        try:
+            self.load_db()
+        except:
+            self.notify_label.config(text="Aggiornamento annullato", foreground="red")
+            return
         current_index = self.loc_combo.current()
         self.loc_combo.config(values=list(self.loc_info[self.header[0]]))
         if current_index >= 0:
