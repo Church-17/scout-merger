@@ -1,9 +1,9 @@
+from webbrowser import open as browse
 import tkinter as tk
 from tkinter.ttk import *
 from tkinter import messagebox
 
 from res import title, version, author, spreadsheet_url, repo_url
-from webbrowser import open as browse
 
 infobox: dict[str, str] = {
     "db": "Il database contiene tutte le informazioni e i contatti riguardanti ogni località della Sardegna inserita. Ad ogni località è associato un gestore, ad ognuno di questi un'istituzione, ad ognuna di queste un ispettorato SIR.",

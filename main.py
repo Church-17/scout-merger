@@ -1,5 +1,6 @@
 from os import remove, path
 from threading import Thread
+from webbrowser import open as browse
 import tkinter as tk
 from tkinter.ttk import *
 from tkinter import Menu, filedialog
@@ -15,7 +16,6 @@ class ScoutMergerGUI:
         self.loc_picked: bool = False
         self.model_picked: bool = False
         self.field_to_insert: dict[str, tuple[Label, Entry]] = {}
-        self.notify_label = None
 
         thread = Thread(target=self.connect_spreadsheet)
         thread.start()
@@ -70,7 +70,7 @@ class ScoutMergerGUI:
         self.menu_bar = Menu(self.window)
         self.instruction_menu = Menu(self.menu_bar, tearoff=False)
         self.database_menu = Menu(self.menu_bar, tearoff=False)
-        self.database_menu.add_command(label="Apri database", command=self.spreadsheet.open)
+        self.database_menu.add_command(label="Apri database", command=lambda:browse(spreadsheet_url))
         self.database_menu.add_command(label="Aggiorna database", command=self.update_db)
         self.database_menu.add_command(label="Download database", command=self.download_db)
         self.menu_bar.add_cascade(label="Database", menu=self.database_menu)
