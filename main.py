@@ -6,8 +6,9 @@ from tkinter import Menu, filedialog
 from mailmerge import MailMerge
 from docx2pdf import convert as docx2pdf
 
-from res import title, spreadsheet_id, sheet_name, ftypes, temp_path, settings_path, showinfo, showerror
 from sheet import GoogleSheet
+from res import title, spreadsheet_url, sheet_name, ftypes, temp_path, settings_path
+from top_window import view_credits, showinfo, showerror
 
 class ScoutMergerGUI:
     def __init__(self) -> None:
@@ -45,7 +46,7 @@ class ScoutMergerGUI:
 
     def connect_spreadsheet(self):
         try:
-            self.spreadsheet = GoogleSheet(spreadsheet_id)
+            self.spreadsheet = GoogleSheet(spreadsheet_url)
             self.load_db()
         except:
             self.spreadsheet = None
@@ -73,9 +74,11 @@ class ScoutMergerGUI:
         self.database_menu.add_command(label="Aggiorna database", command=self.update_db)
         self.database_menu.add_command(label="Download database", command=self.download_db)
         self.menu_bar.add_cascade(label="Database", menu=self.database_menu)
-        self.instruction_menu.add_command(label="Database", command=self.info_db)
-        self.instruction_menu.add_command(label="Modello", command=self.info_model)
-        self.instruction_menu.add_command(label="Richiesta", command=self.info_request)
+        self.instruction_menu.add_command(label="Database", command=lambda:showinfo("db"))
+        self.instruction_menu.add_command(label="Modello", command=lambda:showinfo("model"))
+        self.instruction_menu.add_command(label="Richiesta", command=lambda:showinfo("request"))
+        self.instruction_menu.add_separator()
+        self.instruction_menu.add_command(label="Informazioni", command=lambda:view_credits(self.window))
         self.menu_bar.add_cascade(label="Guida", menu=self.instruction_menu)
         self.window.config(menu=self.menu_bar)
 
@@ -127,15 +130,6 @@ class ScoutMergerGUI:
     def try_enable_save(self):
         if self.loc_picked and self.model_picked:
             self.save_button.config(state=tk.ACTIVE)
-
-    def info_db(self):
-        showinfo("db")
-
-    def info_model(self):
-        showinfo("model")
-
-    def info_request(self):
-        showinfo("request")
 
     def update_db(self):
         self.notify_label.config(text="Aggiornamento database...", foreground="blue")
