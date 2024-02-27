@@ -2,8 +2,17 @@ import tkinter as tk
 from tkinter.ttk import *
 from tkinter import messagebox
 
-from res import title, version, author, spreadsheet_url, repo_url, infobox, errorbox
+from res import title, version, author, spreadsheet_url, repo_url
 from webbrowser import open as browse
+
+infobox: dict[str, str] = {
+    "db": "Il database contiene tutte le informazioni e i contatti riguardanti ogni località della Sardegna inserita. Ad ogni località è associato un gestore, ad ognuno di questi un'istituzione, ad ognuna di queste un ispettorato SIR.",
+    "model": "Il modello deve essere un documento Word che fa da richiesta generica, composto di campi unione per le specifiche come il nome della località o il gestore. I campi unione che verranno riempiti automaticamente sono quelli con i nomi uguali a quelli del database, gli altri come le date o i numeri saranno richiesti all'utente.",
+    "request": "La richiesta compilata deve essere poi mandata per email o PEC all'istituzione di competenza, mettendo l'indirizzo del SIR in CC"
+}
+errorbox: dict[str, str] = {
+    "db": "Il database online è irraggiungibile"
+}
 
 def showinfo(info):
     messagebox.showinfo(title, infobox[info])
