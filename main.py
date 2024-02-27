@@ -17,25 +17,13 @@ class ScoutMergerGUI:
         self.model_picked: bool = False
         self.field_to_insert: dict[str, tuple[Label, Entry]] = {}
 
-        thread = Thread(target=self.connect_spreadsheet)
-        thread.start()
-
-        self.loadbar_win = tk.Tk()
-        self.loadbar_win.geometry("300x50")
-        self.loadbar_win.resizable(False, False)
-        self.loadbar_win.title(title)
-        loadbar = Progressbar(self.loadbar_win, orient=tk.HORIZONTAL, length=280, mode="indeterminate")
-        loadbar.grid(row=0, column=0, padx=10, pady=10)
-        loadbar.start()
-        self.loadbar_win.mainloop()
-        loadbar.stop()
-
-        thread.join()
-        if self.spreadsheet == None:
+        self.spreadsheet = GoogleSheet(spreadsheet_url)
+        try:
+            self.load_db()
+        except:
             showerror("db")
             return
 
-        self.loadbar_win.destroy()
         self.setup_window()
         if path.isfile(settings_path):
             with open(settings_path, "r") as settings_file:
@@ -43,15 +31,6 @@ class ScoutMergerGUI:
                 if path.isfile(prev_model):
                     self.upload_model(prev_model)
         self.window.mainloop()
-
-    def connect_spreadsheet(self):
-        self.spreadsheet = GoogleSheet(spreadsheet_url)
-        try:
-            self.load_db()
-        except:
-            self.spreadsheet = None
-
-        self.loadbar_win.quit()
 
     def load_db(self):
         self.loc_info = self.spreadsheet.read(sheet_name)
