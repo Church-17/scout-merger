@@ -55,7 +55,7 @@ class ScoutMergerGUI:
     def load_db(self):
         self.loc_info = self.spreadsheet.read(sheet_name)
         self.header = list(self.loc_info.columns.values)
-        self.loc_info = self.loc_info.dropna(subset=[self.header[0]]).sort_values(self.header[0]).fillna("")
+        self.loc_info = self.loc_info.dropna(subset=self.header[0]).sort_values(self.header[0]).fillna("")
 
     def setup_window(self):
         self.window = tk.Tk()
