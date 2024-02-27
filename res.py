@@ -2,7 +2,9 @@ from tempfile import gettempdir
 from tkinter import messagebox
 
 title: str = "ScoutMerger"
+author = "Matteo Chiesa"
 version: str = "1.0"
+
 spreadsheet_id: str = "1prvCn3L06m3A7_31DEKfzN9CowLZK_2Gu-A6Q3VI-TY"
 sheet_name: str = "Località"
 
