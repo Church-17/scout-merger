@@ -66,7 +66,6 @@ class ScoutMergerGUI:
         self.loc_label.grid(row=0, column=0, padx=5)
         self.loc_combo = Combobox(self.loc_frame, values=list(self.loc_info[self.header[0]]), width=30)
         self.loc_combo.grid(row=0, column=1, padx=5)
-        # self.loc_combo.bind('<KeyRelease>', self.check_input)
         self.loc_combo.bind("<<ComboboxSelected>>", self.update_recap)
         
         self.recap_frame = Frame(self.window)
