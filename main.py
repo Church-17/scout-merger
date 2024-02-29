@@ -5,7 +5,7 @@ from tkinter.ttk import *
 from mailmerge import MailMerge
 from docx2pdf import convert as docx2pdf
 
-# from tk import *
+from autocombobox import AutoCombobox
 from sheet import GoogleSheet
 from res import title, spreadsheet_url, sheet_name, ftypes, temp_path, settings_path
 from top_window import view_credits, showinfo, showerror
@@ -64,7 +64,7 @@ class ScoutMergerGUI:
         self.loc_frame.grid(row=0, column=0, columnspan=2, pady=8, sticky=tk_const.N)
         self.loc_label = Label(self.loc_frame, text="Località:")
         self.loc_label.grid(row=0, column=0, padx=5)
-        self.loc_combo = Combobox(self.loc_frame, values=list(self.loc_info[self.header[0]]), width=30)
+        self.loc_combo = AutoCombobox(self.loc_frame, values=list(self.loc_info[self.header[0]]), width=30)
         self.loc_combo.grid(row=0, column=1, padx=5)
         self.loc_combo.bind("<<ComboboxSelected>>", self.update_recap)
         
