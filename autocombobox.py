@@ -15,10 +15,10 @@ class AutoCombobox(Combobox):
         kwargs["postcommand"] = self.postcommand
 
         super().__init__(*args, **kwargs)
-        self.toplevel = self.winfo_toplevel()
+        toplevel = self.winfo_toplevel()
         self.listbox_values = self["values"]
 
-        self.frame = Frame(self.toplevel, background="white", highlightbackground="grey48", highlightthickness=1)
+        self.frame = Frame(toplevel, background="white", highlightbackground="grey48", highlightthickness=1)
         self.listbox = Listbox(self.frame, activestyle="none", width=self["width"], borderwidth=0, highlightthickness=0)
         self.scrollbar = Scrollbar(self.frame, command=self.listbox.yview)
         self.listbox.grid(row=0, column=0, padx=(1, 3), pady=1)
@@ -27,8 +27,8 @@ class AutoCombobox(Combobox):
         self.resize_listbox()
         self.listbox.config(yscrollcommand = self.scrollbar.set)
 
-        self.toplevel.bind("<Button-1>", self.click_event)
-        self.toplevel.bind("<Configure>", self.click_event)
+        toplevel.bind("<Button-1>", self.click_event)
+        toplevel.bind("<Configure>", self.click_event)
         self.bind("<KeyRelease>", self.type_event)
         self.listbox.bind("<Motion>", self.motion_event)
         self.listbox.bind("<Leave>", self.leave_event)
@@ -42,9 +42,8 @@ class AutoCombobox(Combobox):
 
     def show_listbox(self):
         self.is_posted = True
-        top_x = self.winfo_rootx() - self.winfo_toplevel().winfo_rootx()
-        top_y = self.winfo_rooty() - self.winfo_toplevel().winfo_rooty()
-        self.frame.place(x=top_x, y=top_y+self.winfo_height())
+        toplevel = self.winfo_toplevel()
+        self.frame.place(x=self.winfo_rootx()-toplevel.winfo_rootx(), y=self.winfo_rooty()-toplevel.winfo_rooty()+self.winfo_height())
         self.frame.lift()
 
     def hide_listbox(self):
