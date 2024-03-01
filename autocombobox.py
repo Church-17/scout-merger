@@ -62,7 +62,7 @@ class AutoCombobox(Combobox):
         else:
             self.update_values()
             
-        # If the _selected_str option is in listbox, view it
+        # If the selected option is in listbox, view it
         if self._selected_str in self._listbox_values:
             self.listbox.see(self._listbox_values.index(self._selected_str))
 
@@ -93,7 +93,7 @@ class AutoCombobox(Combobox):
             self.scrollbar.grid(row=0, column=1, sticky="ns")
         self.listbox.config(height=height)
 
-        # Highlight _selected_str option if it is in listbox
+        # Highlight selected option if it is in listbox
         if self._selected_str in self._listbox_values:
             self._is_select_restored = False
             self.highlight(self._listbox_values.index(self._selected_str))
