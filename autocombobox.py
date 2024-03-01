@@ -36,6 +36,8 @@ class AutoCombobox(Combobox):
     def postcommand(self):
         if self.old_postcommand:
             self.old_postcommand()
+        if self.is_posted:
+            self.after(0, self.hide_listbox)
         self.after(0, lambda: self.tk.call("ttk::combobox::Unpost", self))
 
     def show_listbox(self):
