@@ -36,8 +36,8 @@ class AutoCombobox(Combobox):
         toplevel.bind("<Configure>", self._window_event)    # Handle window events
         self.bind("<KeyRelease>", self._type_event)         # Handle keyboard typing to display coherent options
         self.unbind_class("TCombobox", "<Down>")            # Handle keyboard typing to display coherent options
-        self._listbox.bind("<Motion>", self._motion_event)   # Handle mouse movement to control highlight
-        self._listbox.bind("<Leave>", self._leave_event)     # Handle mouse movement to control highlight
+        self._listbox.bind("<Motion>", self._motion_event)  # Handle mouse movement to control highlight
+        self._listbox.bind("<Leave>", self._leave_event)    # Handle mouse movement to control highlight
 
     # Override configure method to always handle options
     def configure(self, *args, **kwargs):
