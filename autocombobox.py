@@ -90,11 +90,10 @@ class AutoCombobox(Combobox):
     def select(self):
         """Select a value"""
 
-        # If something is _selected, set Combobox on that value
-        selection = self.listbox.curselection()
-        if selection:
-            self._selected = self._listbox_values[selection[0]]
-            self.set(self.listbox.selection_get())
+        # If something is highlighted, set Combobox on that value
+        if self._highlighted >= 0:
+            self._selected = self._listbox_values[self._highlighted]
+            self.set(self._selected)
             self.hide_listbox()
             self.event_generate("<<ComboboxSelected>>")
 
@@ -150,6 +149,10 @@ class AutoCombobox(Combobox):
         # Show listbox if is not opened
         if not self._is_posted:
             self.show_listbox()
+        else:
+            if event.keysym == "Return" and self._highlighted >= 0:
+                self.select()
+                return
 
         # If arrow pressed, move highlight
         if event.keysym == "Down" or event.keysym == "Up":
