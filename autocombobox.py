@@ -10,8 +10,8 @@ class AutoCombobox(Combobox):
         # Declare helper variables
         self._is_posted: bool = False
         self._is_select_restored: bool = True
-        self._highlighted = -1
-        self._selected = ""
+        self._highlighted_index: int = -1
+        self._selected_str: str = ""
 
         # Create Combobox object
         super().__init__(*args)
@@ -20,7 +20,7 @@ class AutoCombobox(Combobox):
 
         # Declare dependent variables
         toplevel = self.winfo_toplevel()
-        self._listbox_values = self["values"]
+        self._listbox_values: tuple = self["values"]
 
         # Create & configure listbox frane
         self.frame = Frame(toplevel, background="white", highlightbackground="grey48", highlightthickness=1)
@@ -59,7 +59,7 @@ class AutoCombobox(Combobox):
     def hide_listbox(self):
         """Hide the Combobox popdown"""
         self._is_posted = False
-        self._highlighted = -1
+        self._highlighted_index = -1
         self.frame.place_forget()
 
     def update_values(self, text: str | None = None):
@@ -82,30 +82,52 @@ class AutoCombobox(Combobox):
             self.scrollbar.grid(row=0, column=1, sticky="ns")
         self.listbox.config(height=height)
 
-        # Highlight _selected option if it is in listbox
-        if self._selected in self._listbox_values:
+        # Highlight _selected_str option if it is in listbox
+        if self._selected_str in self._listbox_values:
             self._is_select_restored = False
-            self.highlight(self._listbox_values.index(self._selected))
+            self.highlight(self._listbox_values.index(self._selected_str))
 
-    def select(self):
+    def select(self, option: str | int | None = None):
         """Select a value"""
 
+        # Check option validity
+        if option == None:
+            option = self._highlighted_index
+        if type(option) == int:
+            if option >= 0 and option < len(self["values"]):
+                self._selected_str = self._listbox_values[option]
+            else:
+                raise ValueError("Given index out of values bound")
+        elif type(option) == str:
+            if option not in self["values"]:
+                raise ValueError("Given option not in values")
+            else:
+                self._selected_str = option
+        else:
+            raise TypeError("Parameter 'option' must be of types 'str', 'int' or 'None'")
+
         # If something is highlighted, set Combobox on that value
-        if self._highlighted >= 0:
-            self._selected = self._listbox_values[self._highlighted]
-            self.set(self._selected)
-            self.hide_listbox()
-            self.event_generate("<<ComboboxSelected>>")
+        self.set(self._selected_str)
+        self.select_range("end", "end")
+        self.icursor("end")
+        self.hide_listbox()
+        self.event_generate("<<ComboboxSelected>>")
 
     def highlight(self, index: int):
         """Highlight the option corresponding to the given index"""
-        self._highlighted = index
+        if type(index) != int or index < 0 or index > self.listbox.size():
+            raise TypeError("Given index must referes to a listbox item")
+
+        self._highlighted_index = index
         self.listbox.itemconfig(index, {"bg": "#0078d7"})
         self.listbox.itemconfig(index, {"fg": "white"})
 
     def unhighlight(self, index):
         """Remove highlight from the option corresponding to the given index"""
-        self._highlighted = -1
+        if type(index) != int or index < 0 or index > self.listbox.size():
+            raise TypeError("Given index must referes to a listbox item")
+
+        self._highlighted_index = -1
         self.listbox.itemconfig(index, {"bg": "white"})
         self.listbox.itemconfig(index, {"fg": "black"})
 
@@ -130,9 +152,9 @@ class AutoCombobox(Combobox):
                     self.update_values("")
                     self.select_range(0, "end")
 
-                # If the _selected option is in listbox, view it
-                if self._selected in self._listbox_values:
-                    self.listbox.see(self._listbox_values.index(self._selected))
+                # If the _selected_str option is in listbox, view it
+                if self._selected_str in self._listbox_values:
+                    self.listbox.see(self._listbox_values.index(self._selected_str))
 
         # If clicked on listobox select the option
         elif event.widget == self.listbox:
@@ -150,7 +172,7 @@ class AutoCombobox(Combobox):
         if not self._is_posted:
             self.show_listbox()
         else:
-            if event.keysym == "Return" and self._highlighted >= 0:
+            if event.keysym == "Return" and self._highlighted_index >= 0:
                 self.select()
                 return
 
@@ -163,12 +185,12 @@ class AutoCombobox(Combobox):
                 direction = -1
             
             # Update highlight & see it
-            new_highlight = self._highlighted + direction
+            new_highlight = self._highlighted_index + direction
             if new_highlight >= 0 and new_highlight < self.listbox.size():
-                if self._highlighted >= 0:
-                    self.unhighlight(self._highlighted)
+                if self._highlighted_index >= 0:
+                    self.unhighlight(self._highlighted_index)
                 self.highlight(new_highlight)
-                self.listbox.see(self._highlighted)
+                self.listbox.see(self._highlighted_index)
             
             # Block internal bind
             return "break"
@@ -178,23 +200,23 @@ class AutoCombobox(Combobox):
 
     def _motion_event(self, event: Event):
         """Handel mouse movement"""
-        # Restore highlight of _selected option if needed    
+        # Restore highlight of _selected_str option if needed    
         if not self._is_select_restored:
             self._is_select_restored = True
-            if self._selected in self._listbox_values:
-                self.unhighlight(self._listbox_values.index(self._selected))
+            if self._selected_str in self._listbox_values:
+                self.unhighlight(self._listbox_values.index(self._selected_str))
 
         # Highlight option under mouse and remove highlight from the old one
         index = self.listbox.index(f"@{event.x},{event.y}")
-        if self._highlighted != index:
-            if self._highlighted >= 0 and self._highlighted < self.listbox.size():
-                self.unhighlight(self._highlighted)
+        if self._highlighted_index != index:
+            if self._highlighted_index >= 0 and self._highlighted_index < self.listbox.size():
+                self.unhighlight(self._highlighted_index)
             self.highlight(index)
 
-    def _leave_event(self, event):
+    def _leave_event(self, event: Event):
         """Handel mouse leaving listbox"""
-        if self._highlighted >= 0 and self._highlighted < self.listbox.size():
-            self.unhighlight(self._highlighted)
+        if self._highlighted_index >= 0 and self._highlighted_index < self.listbox.size():
+            self.unhighlight(self._highlighted_index)
 
     def _postcommand(self):
         """Define new postcommand function to show only the new listbox and not the internal one"""
