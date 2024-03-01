@@ -172,40 +172,42 @@ class AutoCombobox(Combobox):
     def _type_event(self, event: Event):
         """Handle keyboard typing"""
 
-        # Show listbox if is not opened
-        if not self._is_posted:
-            self.show_listbox()
+        if self._is_posted:
+            # Gide listbox when ESC pressed
+            if event.keysym == "Escape":
+                self.hide_listbox()
+                return
+
+            # Select the highlighted option if is pressed enter
+            if event.keysym == "Return" and self._highlighted_index >= 0:
+                self.select()
+                return
+
+            # If arrow pressed, move highlight
+            if event.keysym == "Down" or event.keysym == "Up":
+                # Determine direction
+                if event.keysym == "Down":
+                    direction = 1
+                elif event.keysym == "Up":
+                    direction = -1
+                
+                # Update highlight & see it
+                new_highlight = self._highlighted_index + direction
+                if new_highlight >= 0 and new_highlight < self.listbox.size():
+                    if self._highlighted_index >= 0:
+                        self.unhighlight(self._highlighted_index)
+                    self.highlight(new_highlight)
+                    self.listbox.see(self._highlighted_index)
+                
+                # Block internal bind
+                return "break"
         
-        # Gide listbox when ESC pressed
-        elif event.keysym == "Escape":
-            self.hide_listbox()
-
-        # Select the highlighted option if is pressed enter
-        elif event.keysym == "Return" and self._highlighted_index >= 0:
-            self.select()
-            return
-
-        # If arrow pressed, move highlight
-        elif event.keysym == "Down" or event.keysym == "Up":
-            # Determine direction
-            if event.keysym == "Down":
-                direction = 1
-            elif event.keysym == "Up":
-                direction = -1
-            
-            # Update highlight & see it
-            new_highlight = self._highlighted_index + direction
-            if new_highlight >= 0 and new_highlight < self.listbox.size():
-                if self._highlighted_index >= 0:
-                    self.unhighlight(self._highlighted_index)
-                self.highlight(new_highlight)
-                self.listbox.see(self._highlighted_index)
-            
-            # Block internal bind
-            return "break"
+        # Show listbox if is not opened
+        elif event.char != "" or event.keysym == "Down" or event.keysym == "BackSpace" or event.keysym == "Return":
+            self.show_listbox()
 
         # Show coherent value
-        else:
+        if event.keysym != "Down" and event.keysym != "Return":
             self.update_values()
 
     def _motion_event(self, event: Event):
