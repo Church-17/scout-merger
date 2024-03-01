@@ -175,6 +175,10 @@ class AutoCombobox(Combobox):
         # Show listbox if is not opened
         if not self._is_posted:
             self.show_listbox()
+        
+        # Gide listbox when ESC pressed
+        elif event.keysym == "Escape":
+            self.hide_listbox()
 
         # Select the highlighted option if is pressed enter
         elif event.keysym == "Return" and self._highlighted_index >= 0:
@@ -196,12 +200,17 @@ class AutoCombobox(Combobox):
                     self.unhighlight(self._highlighted_index)
                 self.highlight(new_highlight)
                 self.listbox.see(self._highlighted_index)
+
+            # Hide listbox when pressed up over first option
+            elif new_highlight == -1:
+                self.hide_listbox()
             
             # Block internal bind
             return "break"
 
         # Show coherent value
-        self.update_values()
+        else:
+            self.update_values()
 
     def _motion_event(self, event: Event):
         """Handel mouse movement"""
