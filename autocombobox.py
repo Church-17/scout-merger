@@ -64,9 +64,10 @@ class AutoCombobox(Combobox):
 
     def update_values(self, text: str | None = None):
         """Update listbox values to show coherent options"""
-
         if text == None:
             text = self.get()
+        if type(text) != str:
+            raise TypeError("Parameter 'text' must be of types 'str' or 'None'")
 
         # Change listbox values
         self._listbox_values = [opt for opt in self["values"] if text.lower() in opt.lower()]
