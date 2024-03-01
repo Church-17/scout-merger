@@ -150,23 +150,31 @@ class AutoCombobox(Combobox):
 
     def _type_event(self, event: Event):
         """Handle keyboard typing"""
+
+        # Show listbox if is not opened
         if not self._is_posted:
             self.show_listbox()
 
+        # If arrow pressed, move highlight
         if event.keysym == "Down" or event.keysym == "Up":
+            # Determine direction
             if event.keysym == "Down":
                 direction = 1
             elif event.keysym == "Up":
                 direction = -1
             
+            # Update highlight & see it
             new_highlight = self._highlighted + direction
             if new_highlight >= 0 and new_highlight < self.listbox.size():
                 if self._highlighted >= 0:
                     self.unhighlight(self._highlighted)
                 self.highlight(new_highlight)
                 self.listbox.see(self._highlighted)
+            
+            # Block internal bind
             return "break"
 
+        # Show coherent value
         self.update_values()
 
     def _motion_event(self, event: Event):
