@@ -23,8 +23,7 @@ class AutoCombobox(Combobox):
         self.scrollbar = Scrollbar(self.frame, command=self.listbox.yview)
         self.listbox.grid(row=0, column=0, padx=(1, 3), pady=1)
         self.scrollbar.grid(row=0, column=1, sticky="ns")
-        self.listbox.insert(0, *self["values"])
-        self.resize_listbox()
+        self.update_values("")
         self.listbox.config(yscrollcommand = self.scrollbar.set)
 
         toplevel.bind("<Button-1>", self.click_event)
@@ -54,7 +53,13 @@ class AutoCombobox(Combobox):
         self.listbox_values = [opt for opt in self["values"] if text in opt.lower()]
         self.listbox.delete(0, "end")
         self.listbox.insert(0, *self.listbox_values)
-        self.resize_listbox()
+        if self.listbox.size() <= int(self["height"]):
+            height = self.listbox.size()
+            self.scrollbar.grid_forget()
+        else:
+            height = self["height"]
+            self.scrollbar.grid(row=0, column=1, sticky="ns")
+        self.listbox.config(height=height)
         if self.selected in self.listbox_values:
             self.is_select_restored = False
             self.highlight(self.listbox_values.index(self.selected))
@@ -74,15 +79,6 @@ class AutoCombobox(Combobox):
     def unhighlight(self, index):
         self.listbox.itemconfig(index, {"bg": "white"})
         self.listbox.itemconfig(index, {"fg": "black"})
-
-    def resize_listbox(self):
-        if self.listbox.size() <= int(self["height"]):
-            height = self.listbox.size()
-            self.scrollbar.grid_forget()
-        else:
-            height = self["height"]
-            self.scrollbar.grid(row=0, column=1, sticky="ns")
-        self.listbox.config(height=height)
 
     def click_event(self, event: Event):
         if self.is_posted and event.widget != self and event.widget != self.listbox and event.widget != self.scrollbar and event.widget != self.frame:
