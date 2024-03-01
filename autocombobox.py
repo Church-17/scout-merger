@@ -200,10 +200,6 @@ class AutoCombobox(Combobox):
                     self.unhighlight(self._highlighted_index)
                 self.highlight(new_highlight)
                 self.listbox.see(self._highlighted_index)
-
-            # Hide listbox when pressed up over first option
-            elif new_highlight == -1:
-                self.hide_listbox()
             
             # Block internal bind
             return "break"
