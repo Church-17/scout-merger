@@ -205,10 +205,11 @@ class AutoCombobox(Combobox):
         # Show listbox if is not opened
         elif event.char != "" or event.keysym == "Down" or event.keysym == "BackSpace" or event.keysym == "Return":
             self.show_listbox()
+            if event.keysym == "Down" or event.keysym == "Return":
+                return
 
         # Show coherent value
-        if event.keysym != "Down" and event.keysym != "Return":
-            self.update_values()
+        self.update_values()
 
     def _motion_event(self, event: Event):
         """Handel mouse movement"""
