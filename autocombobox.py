@@ -100,7 +100,7 @@ class AutoCombobox(Combobox):
             self._selected = self._listbox_values[selection[0]]
             self.set(self.listbox.selection_get())
             self.hide_listbox()
-            self.event_generate("<<Combobox_selected>>")
+            self.event_generate("<<ComboboxSelected>>")
 
     def highlight(self, index: int):
         """Highlight the option corresponding to the given index"""
