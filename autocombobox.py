@@ -39,10 +39,9 @@ class AutoCombobox(Combobox):
         toplevel.bind("<Button-1>", self._click_event)      # Handle mouse click
         toplevel.bind("<Configure>", self._window_event)    # Handle window events
         self.bind("<KeyRelease>", self._type_event)         # Handle keyboard typing to display coherent options
+        self.unbind_class("TCombobox", "<Down>")            # Handle keyboard typing to display coherent options
         self.listbox.bind("<Motion>", self._motion_event)   # Handle mouse movement to control highlight
         self.listbox.bind("<Leave>", self._leave_event)     # Handle mouse movement to control highlight
-        self.bind("<Up>", self._arrow_event)                # Handle UP key to control highlight
-        self.bind("<Down>", self._arrow_event)              # Handle DOWN key to control highlight
 
     # Override configure method to always handle options
     def configure(self, *args, **kwargs):
@@ -64,6 +63,7 @@ class AutoCombobox(Combobox):
     def hide_listbox(self):
         """Hide the Combobox popdown"""
         self._is_posted = False
+        self._highlighted = -1
         self.frame.place_forget()
 
     def update_values(self, text: str | None = None):
@@ -148,10 +148,25 @@ class AutoCombobox(Combobox):
         if self._is_posted and event.widget == self.winfo_toplevel():
             self.hide_listbox()
 
-    def _type_event(self, event):
+    def _type_event(self, event: Event):
         """Handle keyboard typing"""
         if not self._is_posted:
             self.show_listbox()
+
+        if event.keysym == "Down" or event.keysym == "Up":
+            if event.keysym == "Down":
+                direction = 1
+            elif event.keysym == "Up":
+                direction = -1
+            
+            new_highlight = self._highlighted + direction
+            if new_highlight >= 0 and new_highlight < self.listbox.size():
+                if self._highlighted >= 0:
+                    self.unhighlight(self._highlighted)
+                self.highlight(new_highlight)
+                self.listbox.see(self._highlighted)
+            return "break"
+
         self.update_values()
 
     def _motion_event(self, event: Event):
@@ -173,19 +188,6 @@ class AutoCombobox(Combobox):
         """Handel mouse leaving listbox"""
         if self._highlighted >= 0 and self._highlighted < self.listbox.size():
             self.unhighlight(self._highlighted)
-
-    def _arrow_event(self, event: Event):
-        if event.keysym == "Down":
-            direction = 1
-        elif event.keysym == "Up":
-            direction = -1
-        
-        new_highlight = self._highlighted + direction
-        if new_highlight >= 0 and new_highlight < self.listbox.size():
-            if self._highlighted >= 0:
-                self.unhighlight(self._highlighted)
-            self.highlight(new_highlight)
-        return "break"
 
     def _postcommand(self):
         """Define new postcommand function to show only the new listbox and not the internal one"""
