@@ -23,7 +23,7 @@ class AutoCombobox(Combobox):
         self._listbox_values = self["values"]
 
         # Create & configure listbox frane
-        self.frame = Frame(toplevel, background="white", highlightbackground="red", highlightthickness=1)
+        self.frame = Frame(toplevel, background="white", highlightbackground="grey48", highlightthickness=1)
         self.listbox = Listbox(self.frame, activestyle="none", width=self["width"], borderwidth=0, highlightthickness=0)
         self.scrollbar = Scrollbar(self.frame, command=self.listbox.yview)
         self.listbox.grid(row=0, column=0, padx=(1, 3), pady=1)
