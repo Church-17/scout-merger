@@ -5,7 +5,7 @@ class AutoCombobox(Combobox):
     """Autocomplete Combobox"""
 
     def __init__(self, *args, **kwargs):
-        """Create an Autocomplete ttk Combobox"""
+        """Create an Autocomplete ttk Combobox. Options are the same of ttk Combobox"""
 
         # Declare helper variables
         self._is_posted: bool = False
