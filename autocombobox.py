@@ -54,7 +54,17 @@ class AutoCombobox(Combobox):
         toplevel = self.winfo_toplevel()
         self.frame.place(x=self.winfo_rootx()-toplevel.winfo_rootx(), y=self.winfo_rooty()-toplevel.winfo_rooty()+self.winfo_height())
         self.frame.lift()
-        self.update_values()
+
+        # If the current text is an option, reset listbox & select text
+        if self.get().lower() in list(map(lambda s: s.lower(), self["values"])):
+            self.update_values("")
+            self.select_range(0, "end")
+        else:
+            self.update_values()
+            
+        # If the _selected_str option is in listbox, view it
+        if self._selected_str in self._listbox_values:
+            self.listbox.see(self._listbox_values.index(self._selected_str))
 
     def hide_listbox(self):
         """Hide the Combobox popdown"""
@@ -87,6 +97,8 @@ class AutoCombobox(Combobox):
         if self._selected_str in self._listbox_values:
             self._is_select_restored = False
             self.highlight(self._listbox_values.index(self._selected_str))
+        elif self._listbox_values:
+            self.highlight(0)
 
     def select(self, option: str | int | None = None):
         """Select a value"""
@@ -148,15 +160,6 @@ class AutoCombobox(Combobox):
             else:
                 self.show_listbox()
 
-                # If the current text is an option, reset listbox & select text
-                if self.get().lower() in list(map(lambda s: s.lower(), self["values"])):
-                    self.update_values("")
-                    self.select_range(0, "end")
-
-                # If the _selected_str option is in listbox, view it
-                if self._selected_str in self._listbox_values:
-                    self.listbox.see(self._listbox_values.index(self._selected_str))
-
         # If clicked on listobox select the option
         elif event.widget == self.listbox:
             self.select()
@@ -172,13 +175,14 @@ class AutoCombobox(Combobox):
         # Show listbox if is not opened
         if not self._is_posted:
             self.show_listbox()
-        else:
-            if event.keysym == "Return" and self._highlighted_index >= 0:
-                self.select()
-                return
+
+        # Select the highlighted option if is pressed enter
+        elif event.keysym == "Return" and self._highlighted_index >= 0:
+            self.select()
+            return
 
         # If arrow pressed, move highlight
-        if event.keysym == "Down" or event.keysym == "Up":
+        elif event.keysym == "Down" or event.keysym == "Up":
             # Determine direction
             if event.keysym == "Down":
                 direction = 1
@@ -212,7 +216,8 @@ class AutoCombobox(Combobox):
         if self._highlighted_index != index:
             if self._highlighted_index >= 0 and self._highlighted_index < self.listbox.size():
                 self.unhighlight(self._highlighted_index)
-            self.highlight(index)
+            if index >= 0:
+                self.highlight(index)
 
     def _leave_event(self, event: Event):
         """Handel mouse leaving listbox"""
