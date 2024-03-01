@@ -27,7 +27,7 @@ class AutoCombobox(Combobox):
         self._listbox_values = self["values"]
 
         # Create & configure listbox frane
-        self.frame = Frame(toplevel, background="white", highlightbackground="grey48", highlightthickness=1)
+        self.frame = Frame(toplevel, background="white", highlightbackground="red", highlightthickness=1)
         self.listbox = Listbox(self.frame, activestyle="none", width=self["width"], borderwidth=0, highlightthickness=0)
         self.scrollbar = Scrollbar(self.frame, command=self.listbox.yview)
         self.listbox.grid(row=0, column=0, padx=(1, 3), pady=1)
@@ -36,25 +36,25 @@ class AutoCombobox(Combobox):
         self.listbox.config(yscrollcommand = self.scrollbar.set)
 
         # Bind events
-        toplevel.bind("<Button-1>", self._click_event)       # Handle mouse click
-        toplevel.bind("<Configure>", self._click_event)      # Handle window resize
-        self.bind("<KeyRelease>", self._type_event)          # Handle keyboard typing to display coherent options
-        self.listbox.bind("<Motion>", self._motion_event)    # Handle mouse movement to control highlight
-        self.listbox.bind("<Leave>", self._leave_event)      # Handle mouse movement to control highlight
-        # self.listbox.bind("<Up>", self._leave_event)         # Handle UP key to control highlight
-        # self.listbox.bind("<Down>", self._leave_event)       # Handle DOWN key to control highlight
+        toplevel.bind("<Button-1>", self._click_event)      # Handle mouse click
+        toplevel.bind("<Configure>", self._window_event)    # Handle window events
+        self.bind("<KeyRelease>", self._type_event)         # Handle keyboard typing to display coherent options
+        self.listbox.bind("<Motion>", self._motion_event)   # Handle mouse movement to control highlight
+        self.listbox.bind("<Leave>", self._leave_event)     # Handle mouse movement to control highlight
+        self.bind("<Up>", self._arrow_event)                # Handle UP key to control highlight
+        self.bind("<Down>", self._arrow_event)              # Handle DOWN key to control highlight
 
     # Override configure method to always handle options
     def configure(self, *args, **kwargs):
         if "postcommand" in kwargs:
-            self.old_postcommand = kwargs["postcommand"]
+            self._old_postcommand = kwargs["postcommand"]
         else:
-            self.old_postcommand = None
+            self._old_postcommand = None
         kwargs["postcommand"] = self._postcommand
         return super().configure(*args, **kwargs)
 
     def show_listbox(self):
-        """Open the Combobox popdown."""
+        """Open the Combobox popdown"""
         self._is_posted = True
         toplevel = self.winfo_toplevel()
         self.frame.place(x=self.winfo_rootx()-toplevel.winfo_rootx(), y=self.winfo_rooty()-toplevel.winfo_rooty()+self.winfo_height())
@@ -62,7 +62,7 @@ class AutoCombobox(Combobox):
         self.update_values()
 
     def hide_listbox(self):
-        """Hide the Combobox popdown."""
+        """Hide the Combobox popdown"""
         self._is_posted = False
         self.frame.place_forget()
 
@@ -116,26 +116,37 @@ class AutoCombobox(Combobox):
 
     def _click_event(self, event: Event):
         """Handle mouse click"""
+
+        # Hide listbox if clicked outside
         if self._is_posted and event.widget != self and event.widget != self.listbox and event.widget != self.scrollbar and event.widget != self.frame:
-            # Hide listbox if clicked outside
             self.hide_listbox()
+
         elif event.widget == self:
+            # If listbox is open, update it
             if self._is_posted:
-                # If listbox is open, update it
                 self.update_values()
+
+            # If listbox is not opened, open it
             else:
-                # If listbox is not opened, open it
                 self.show_listbox()
+
                 # If the current text is an option, reset listbox & select text
                 if self.get().lower() in list(map(lambda s: s.lower(), self["values"])):
                     self.update_values("")
                     self.select_range(0, "end")
+
                 # If the _selected option is in listbox, view it
                 if self._selected in self._listbox_values:
                     self.listbox.see(self._listbox_values.index(self._selected))
+
+        # If clicked on listobox select the option
         elif event.widget == self.listbox:
-            # If clicked on listobox select the option
             self.select()
+
+    def _window_event(self, event: Event):
+        """Handle window events"""
+        if self._is_posted and event.widget == self.winfo_toplevel():
+            self.hide_listbox()
 
     def _type_event(self, event):
         """Handle keyboard typing"""
@@ -154,20 +165,33 @@ class AutoCombobox(Combobox):
         # Highlight option under mouse and remove highlight from the old one
         index = self.listbox.index(f"@{event.x},{event.y}")
         if self._highlighted != index:
-            if self._highlighted != -1 and self._highlighted < self.listbox.size():
+            if self._highlighted >= 0 and self._highlighted < self.listbox.size():
                 self.unhighlight(self._highlighted)
             self.highlight(index)
 
     def _leave_event(self, event):
         """Handel mouse leaving listbox"""
-        if self._highlighted != -1 and self._highlighted < self.listbox.size():
+        if self._highlighted >= 0 and self._highlighted < self.listbox.size():
             self.unhighlight(self._highlighted)
 
-    # Define new postcommand function to show only the new listbox and not the internal one
+    def _arrow_event(self, event: Event):
+        if event.keysym == "Down":
+            direction = 1
+        elif event.keysym == "Up":
+            direction = -1
+        
+        new_highlight = self._highlighted + direction
+        if new_highlight >= 0 and new_highlight < self.listbox.size():
+            if self._highlighted >= 0:
+                self.unhighlight(self._highlighted)
+            self.highlight(new_highlight)
+        return "break"
+
     def _postcommand(self):
+        """Define new postcommand function to show only the new listbox and not the internal one"""
         # Execute user postcommand if there is one
-        if self.old_postcommand:
-            self.old_postcommand()
+        if self._old_postcommand:
+            self._old_postcommand()
         
         # If the listbox is opened, hide it
         if self._is_posted:
