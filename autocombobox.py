@@ -34,7 +34,6 @@ class AutoCombobox(Combobox):
         self._listbox.grid(row=0, column=0, padx=(1, 3), pady=1)
         self._scrollbar.grid(row=0, column=1, sticky="ns")
         self._listbox.config(yscrollcommand = self._scrollbar.set)
-        self.update_values("")
 
         # Bind events
         toplevel.bind("<Button-1>", self._click_event)      # Handle mouse click
@@ -62,6 +61,8 @@ class AutoCombobox(Combobox):
             self.update_values("")
             self.select_range(0, "end")
             self.icursor("end")
+        else:
+            self.update_values()
 
         # If the selected option is in listbox, view it
         if self._selected_str in self._listbox_values:
@@ -72,8 +73,8 @@ class AutoCombobox(Combobox):
 
         # Hide frame
         self._frame.place_forget()
+        self._change_highlight(-1)
         self._is_posted = False
-        self._highlighted_index = -1
 
     def update_values(self, text: str | None = None):
         """Update listbox values to show coherent options"""
@@ -177,46 +178,34 @@ class AutoCombobox(Combobox):
             # Gide listbox when ESC pressed
             if event.keysym == "Escape":
                 self.hide_listbox()
-                return
 
             # Select the highlighted option if is pressed enter
-            if event.keysym == "Return" and self._highlighted_index >= 0:
+            elif event.keysym == "Return" and self._highlighted_index >= 0:
                 self.select(self._listbox_values[self._highlighted_index])
-                return
 
             # If arrow pressed, move highlight
-            if event.keysym == "Down" or event.keysym == "Up":
-                # Determine direction
-                if event.keysym == "Down":
-                    direction = 1
-                elif event.keysym == "Up":
-                    direction = -1
-
-                # Update highlight & see it
-                new_highlight = self._highlighted_index + direction
-                if new_highlight >= 0 and new_highlight < self._listbox.size():
-                    self._change_highlight(new_highlight)
-
-                # Block internal bind
-                return "break"
+            elif event.keysym == "Down":
+                if self._highlighted_index + 1 < self._listbox.size():
+                    self._change_highlight(self._highlighted_index + 1)
+            elif event.keysym == "Up":
+                if self._highlighted_index - 1 >= 0:
+                    self._change_highlight(self._highlighted_index - 1)
 
             # If home pressed, highlight first option
-            if event.keysym == "Home":
+            elif event.keysym == "Home":
                 self._change_highlight(0)
-                return
 
-            if event.keysym == "End":
+            # If end pressed, highlight last option
+            elif event.keysym == "End":
                 self._change_highlight(self._listbox.size()-1)
-                return
+            
+            # Filter options
+            else:
+                self.update_values()
 
         # Show listbox if is not opened
         elif event.char != "" or event.keysym == "Down" or event.keysym == "BackSpace" or event.keysym == "Return":
             self.show_listbox()
-            if event.keysym == "Down" or event.keysym == "Return":
-                return
-
-        # Show coherent value
-        self.update_values()
 
     def _motion_event(self, event: Event):
         """Handle mouse movement"""
