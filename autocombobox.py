@@ -40,7 +40,7 @@ class AutoCombobox(Combobox):
 
     # Override configure method to always handle options
     def configure(self, *args, **kwargs):
-        
+
         if "postcommand" in kwargs:
             self._old_postcommand = kwargs["postcommand"]
         else:
@@ -125,6 +125,7 @@ class AutoCombobox(Combobox):
         self.select_range("end", "end")
         self.icursor("end")
         self.hide_listbox()
+        self.focus()
         self.event_generate("<<ComboboxSelected>>")
 
     def highlight(self, index: int):
