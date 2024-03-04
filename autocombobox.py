@@ -40,6 +40,7 @@ class AutoCombobox(Combobox):
 
     # Override configure method to always handle options
     def configure(self, *args, **kwargs):
+        
         if "postcommand" in kwargs:
             self._old_postcommand = kwargs["postcommand"]
         else:
@@ -49,6 +50,7 @@ class AutoCombobox(Combobox):
 
     def show_listbox(self):
         """Open the Combobox popdown"""
+
         self._is_posted = True
         toplevel = self.winfo_toplevel()
         self._frame.place(x=self.winfo_rootx()-toplevel.winfo_rootx(), y=self.winfo_rooty()-toplevel.winfo_rooty()+self.winfo_height())
@@ -67,12 +69,15 @@ class AutoCombobox(Combobox):
 
     def hide_listbox(self):
         """Hide the Combobox popdown"""
+
         self._is_posted = False
         self._highlighted_index = -1
         self._frame.place_forget()
 
     def update_values(self, text: str | None = None):
         """Update listbox values to show coherent options"""
+
+        # Check params
         if text == None:
             text = self.get()
         if type(text) != str:
@@ -101,7 +106,7 @@ class AutoCombobox(Combobox):
     def select(self, option: str | int):
         """Select a value"""
 
-        # Check option validity
+        # Check params & update vars
         if type(option) == int:
             if option >= 0 and option < len(self["values"]):
                 self._selected_str = self._listbox_values[option]
@@ -124,18 +129,24 @@ class AutoCombobox(Combobox):
 
     def highlight(self, index: int):
         """Highlight the option corresponding to the given index"""
+
+        # Check params
         if type(index) != int or index < 0 or index > self._listbox.size():
             raise TypeError("Given index must referes to a listbox item")
 
+        # Highlight & update vars
         self._highlighted_index = index
         self._listbox.itemconfig(index, {"bg": "#0078d7"})
         self._listbox.itemconfig(index, {"fg": "white"})
 
     def unhighlight(self, index):
         """Remove highlight from the option corresponding to the given index"""
+
+        # Check params
         if type(index) != int or index < 0 or index > self._listbox.size():
             raise TypeError("Given index must referes to a listbox item")
 
+        # Highlight & update vars
         self._highlighted_index = -1
         self._listbox.itemconfig(index, {"bg": "white"})
         self._listbox.itemconfig(index, {"fg": "black"})
@@ -162,6 +173,7 @@ class AutoCombobox(Combobox):
 
     def _window_event(self, event: Event):
         """Handle window events"""
+
         if self._is_posted and event.widget == self.winfo_toplevel():
             self.hide_listbox()
 
@@ -208,7 +220,8 @@ class AutoCombobox(Combobox):
         self.update_values()
 
     def _motion_event(self, event: Event):
-        """Handel mouse movement"""
+        """Handle mouse movement"""
+
         # Highlight option under mouse and remove highlight from the old one
         index = self._listbox.index(f"@{event.x},{event.y}")
         if self._highlighted_index != index:
@@ -219,11 +232,13 @@ class AutoCombobox(Combobox):
 
     def _leave_event(self, event: Event):
         """Handel mouse leaving listbox"""
+
         if self._highlighted_index >= 0 and self._highlighted_index < self._listbox.size():
             self.unhighlight(self._highlighted_index)
 
     def _postcommand(self):
         """Define new postcommand function to show only the new listbox and not the internal one"""
+        
         # Execute user postcommand if there is one
         if self._old_postcommand:
             self._old_postcommand()
