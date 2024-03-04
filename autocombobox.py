@@ -168,6 +168,7 @@ class AutoCombobox(Combobox):
     def _window_event(self, event: Event):
         """Handle window events"""
 
+        # Hide listbox if user interact with the window
         if self._is_posted and event.widget == self.winfo_toplevel():
             self.hide_listbox()
 
