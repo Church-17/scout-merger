@@ -9,7 +9,6 @@ class AutoCombobox(Combobox):
 
         # Declare helper variables
         self._is_posted: bool = False
-        self._is_select_restored: bool = True
         self._highlighted_index: int = -1
         self._selected_str: str = ""
 
@@ -95,7 +94,6 @@ class AutoCombobox(Combobox):
 
         # Highlight selected option if it is in listbox
         if self._selected_str in self._listbox_values:
-            self._is_select_restored = False
             self.highlight(self._listbox_values.index(self._selected_str))
         elif self._listbox_values:
             self.highlight(0)
@@ -211,12 +209,6 @@ class AutoCombobox(Combobox):
 
     def _motion_event(self, event: Event):
         """Handel mouse movement"""
-        # Restore highlight of _selected_str option if needed    
-        if not self._is_select_restored:
-            self._is_select_restored = True
-            if self._selected_str in self._listbox_values:
-                self.unhighlight(self._listbox_values.index(self._selected_str))
-
         # Highlight option under mouse and remove highlight from the old one
         index = self._listbox.index(f"@{event.x},{event.y}")
         if self._highlighted_index != index:
